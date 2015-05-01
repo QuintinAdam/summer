@@ -1,6 +1,7 @@
 require 'socket'
 require 'fileutils'
 require 'yaml'
+require 'openssl'
 require 'active_support/hash_with_indifferent_access'
 require 'active_support/core_ext/object/try'
 
@@ -53,7 +54,9 @@ module Summer
 
     def connect!
       @connection = TCPSocket.open(server, port)
+      @connection = OpenSSL::SSL::SSLSocket.new(@connection).connect if config[:use_ssl]
       response("USER #{config[:nick]} #{config[:nick]} #{config[:nick]} #{config[:nick]}")
+      response("PASS #{config[:server_password]}") if config[:server_password]
       response("NICK #{config[:nick]}")
     end
 
